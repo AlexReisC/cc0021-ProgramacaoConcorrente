@@ -5,6 +5,7 @@
 
 #define MAX 500000000
 
+// Funcao que gera um vetor de tamanho MAX com elementos aleatorios
 float *geraVetor(int tam){
     float *vetor;
     vetor = (float*)malloc(sizeof(float)*tam);
@@ -58,6 +59,10 @@ int main(){
     
     printf("\nMedia Paralela: %f\nTempo paralelo: %f",media2, tempo_P);
     // FIM DO PARALELO
-    printf("\nSpeedup %f", (tempo_P / tempo_S));
+    
+    double speedup = tempo_P / tempo_S;
+    printf("\nSpeedup: %f", speedup);
+    printf("\nEficiencia: %f", (speedup*0.4));
+    
     return 0;
 }
