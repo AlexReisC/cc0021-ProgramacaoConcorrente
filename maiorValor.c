@@ -1,25 +1,21 @@
 #include <stdio.h>
 #include <omp.h>
+#include <stdlib.h>
 
 #define MAX 10000000
 
-int *geraVetor(int tam){
-    int *vetor = (float*)malloc(sizeof(int)*tam);
-    for(int i = 0; i < tam; i++){
-        int num = (rand() / RAND_MAX)*100;
-        vetor[i] = num;
-    }
-    return vetor;
-}
+float *geraVetor(int tam);
 
 int main(){
-    int vet[];
+    float *vet = NULL;
     vet = geraVetor(MAX);
+
     int i, x;
     int maior = vet[0];
     int maiores[4];
+    int indices[4];
 
-    #pragma omp parallel firstprivate(maior) num_threads(4)
+    #pragma omp parallel num_threads(4)
     {
         #pragma omp for
         for(i = 0; i < MAX; i++){
@@ -29,10 +25,20 @@ int main(){
         }
         maiores[omp_get_thread_num()] = maior;
     }
-    
+
     for(i = 0; i<4; i++){
-        printf("Maior: %d", maiores[i]);
+        printf("Maior da thread %d: %d\n",i, maiores[i]);
     }
     
     return 0;
+}
+
+float *geraVetor(int tam){
+    float *vetor;
+    vetor = (float*)malloc(sizeof(float)*tam);
+    for(int i = 0; i < tam; i++){
+        float num = (rand() / (float)RAND_MAX)*100;
+        vetor[i] = num;
+    }
+    return vetor;
 }
