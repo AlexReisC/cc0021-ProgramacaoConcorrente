@@ -1,12 +1,15 @@
 #include <stdio.h>
 #include <omp.h>
 #include <stdlib.h>
+#include <time.h>
 
 #define MAX 10000000
 
 float *geraVetor(int tam);
 
 int main(){
+    time_t t;
+    srand(time(NULL));
     float *vet = NULL;
     vet = geraVetor(MAX);
 
