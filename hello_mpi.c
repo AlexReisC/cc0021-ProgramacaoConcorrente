@@ -10,6 +10,8 @@ float *gerar_vetor(int n);
 int main()
 {
 
+    
+
     // Iniciando MPI
     MPI_Init(NULL, NULL);
     int nprocs;
