@@ -1,43 +1,72 @@
+#include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <mpi.h>
+#include <time.h>
 
-#define MAX 1000
+#define TAMANHO 1000
+#define max  10000
 
-int main(){
+
+int main(int argc, char** argv) {
+    //Iniciando MPI
     MPI_Init(NULL, NULL);
     int nprocs;
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Status status;
-
-    float *vet = NULL;
-
-    if(rank == 0){
-        vet = geraVetor(MAX);
-        MPI_Bcast(vet, MAX, MPI_FLOAT, 0, MPI_COMM_WORLD);
-        printf();
-    } else{
-        v = (float*)malloc(sizeof(float)*MAX);
-        if(rank == 1){
-            for (int i = 0; i < MAX; i++){
-                
-            }
-            
+    if (nprocs>3) {
+        MPI_Abort(MPI_COMM_WORLD,1);
+        MPI_Finalize();
+    }
+    long int i;
+    
+    if (rank==0) {
+        /*
+        Gerar o vetor, distribuir carga para os demais processos
+        */
+        //Gerando o vetor
+        long int soma_total,soma_total_dobro;
+        long int *vetor;
+        vetor = malloc(TAMANHO*sizeof(long int));
+        time_t t;
+        srand((unsigned) time(&t));
+        for (i=0;i<TAMANHO;i++) {
+            long int num = (rand() % (max+1));
+            vetor[i] = num;
         }
+        MPI_Bcast(vetor,TAMANHO,MPI_LONG,0,MPI_COMM_WORLD);
+        MPI_Recv(&soma_total, 1, MPI_LONG, 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Recv(&soma_total_dobro, 1, MPI_LONG, 2, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        printf("Total: %ld\n",soma_total);
+        printf("Total: %ld\n",soma_total_dobro);
+    }
+    else if (rank==1) {
+        long int *vetor;
+        vetor = malloc(TAMANHO*sizeof(long int));
+        MPI_Bcast(vetor,TAMANHO,MPI_LONG,0,MPI_COMM_WORLD);
+        //Somar
+        long int soma=0;
+        for (i=0; i<TAMANHO;i++) {
+            soma = soma + vetor[i];
+        }
+        MPI_Send(&soma, 1, MPI_LONG, 0, 0, MPI_COMM_WORLD);
+    }
+    else if (rank==2) {
+        long int *vetor;
+        vetor = malloc(TAMANHO*sizeof(long int));
+        MPI_Bcast(vetor,TAMANHO,MPI_LONG,0,MPI_COMM_WORLD);
+        //Soma do dobro
+        long int soma = 0;
+        for (i=0; i<TAMANHO;i++) {
+            soma = soma + 2*vetor[i];
+        }
+        MPI_Send(&soma, 1, MPI_LONG, 0, 0, MPI_COMM_WORLD);
     }
 
+    /*
+    FIM DO CÓDIGO MPI
+    */
     MPI_Finalize();
     return 0;
-}
-
-float *geraVetor(int tam){
-    float *vetor;
-    vetor = (float*)malloc(sizeof(float)*tam);
-    for(int i = 0; i < tam; i++){
-        float num = (rand() / (float)RAND_MAX)*100;
-        vetor[i] = num;
-    }
-    return vetor;
 }
